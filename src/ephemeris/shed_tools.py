@@ -47,7 +47,7 @@ from bioblend.galaxy.client import ConnectionError
 from bioblend.galaxy.toolshed import ToolShedClient
 from galaxy.tool_util.verify.interactor import (
     GalaxyInteractorApi,
-    verify_tool,
+    # verify_tool,
 )
 from galaxy.util import unicodify
 
@@ -55,7 +55,7 @@ from . import get_galaxy_connection, load_yaml_file
 from .ephemeris_log import disable_external_library_logging, setup_global_logger
 from .get_tool_list_from_galaxy import GiToToolYaml, the_same_repository, tools_for_repository
 from .shed_tools_args import parser
-from .shed_tools_methods import complete_repo_information, flatten_repo_info, VALID_KEYS
+from .shed_tools_methods import complete_repo_information, flatten_repo_info, VALID_KEYS, verify_tool_keep_history as verify_tool
 
 
 class InstallRepositoryManager(object):

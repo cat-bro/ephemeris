@@ -1,5 +1,19 @@
+import time
+
 from bioblend.toolshed import ToolShedInstance
 
+from galaxy import util
+
+from galaxy.tool_util.verify.interactor import (
+    ToolTestDescription,
+    _handle_def_errors,
+    stage_data_in_history,
+    RunToolException,
+    _verify_outputs,
+    JobOutputsError,
+)
+
+DEFAULT_TOOL_TEST_WAIT = 86400
 
 VALID_KEYS = [
     "name",
@@ -107,3 +121,97 @@ def flatten_repo_info(repositories):
         else:  # Revision was not defined at all
             flattened_list.append(new_repo_info)
     return flattened_list
+
+
+def verify_tool_keep_history(
+    tool_id,
+    galaxy_interactor,
+    resource_parameters=None,
+    register_job_data=None,
+    test_index=0,
+    tool_version=None,
+    quiet=False,
+    test_history=None,
+    force_path_paste=False,
+    maxseconds=DEFAULT_TOOL_TEST_WAIT,
+    tool_test_dicts=None
+):
+    if resource_parameters is None:
+        resource_parameters = {}
+    tool_test_dicts = tool_test_dicts or galaxy_interactor.get_tool_tests(tool_id, tool_version=tool_version)
+    tool_test_dict = tool_test_dicts[test_index]
+    tool_test_dict.setdefault('maxseconds', maxseconds)
+    testdef = ToolTestDescription(tool_test_dict)
+    _handle_def_errors(testdef)
+
+    if test_history is None:
+        test_history = galaxy_interactor.new_history()
+
+    # Upload data to test_history, run the tool and check the outputs - record
+    # API input, job info, tool run exception, as well as exceptions related to
+    # job output checking and register they with the test plugin so it can
+    # record structured information.
+    tool_inputs = None
+    job_stdio = None
+    job_output_exceptions = None
+    tool_execution_exception = None
+    expected_failure_occurred = False
+    begin_time = time.time()
+    try:
+        stage_data_in_history(galaxy_interactor,
+                            tool_id,
+                            testdef.test_data(),
+                            history=test_history,
+                            force_path_paste=force_path_paste,
+                            maxseconds=maxseconds)
+        try:
+            tool_response = galaxy_interactor.run_tool(testdef, test_history, resource_parameters=resource_parameters)
+            data_list, jobs, tool_inputs = tool_response.outputs, tool_response.jobs, tool_response.inputs
+            data_collection_list = tool_response.output_collections
+        except RunToolException as e:
+            tool_inputs = e.inputs
+            tool_execution_exception = e
+            if not testdef.expect_failure:
+                raise e
+            else:
+                expected_failure_occurred = True
+        except Exception as e:
+            tool_execution_exception = e
+            raise e
+
+        if not expected_failure_occurred:
+            assert data_list or data_collection_list
+
+            try:
+                job_stdio = _verify_outputs(testdef, test_history, jobs, tool_id, data_list, data_collection_list, galaxy_interactor, quiet=quiet)
+            except JobOutputsError as e:
+                job_stdio = e.job_stdio
+                job_output_exceptions = e.output_exceptions
+                raise e
+            except Exception as e:
+                job_output_exceptions = [e]
+                raise e
+    finally:
+        if register_job_data is not None:
+            end_time = time.time()
+            job_data = {
+                "tool_id": tool_id,
+                "tool_version": tool_version,
+                "test_index": test_index,
+                "time_seconds": end_time - begin_time,
+            }
+            if tool_inputs is not None:
+                job_data["inputs"] = tool_inputs
+            if job_stdio is not None:
+                job_data["job"] = job_stdio
+            status = "success"
+            if job_output_exceptions:
+                job_data["output_problems"] = [util.unicodify(_) for _ in job_output_exceptions]
+                status = "failure"
+            if tool_execution_exception:
+                job_data["execution_problem"] = util.unicodify(tool_execution_exception)
+                status = "error"
+            job_data["status"] = status
+            register_job_data(job_data)
+    # 
+    # galaxy_interactor.delete_history(test_history)
