@@ -237,7 +237,7 @@ class InstallRepositoryManager(object):
 
         installed_tools = []
         for target_repository in target_repositories:
-            repo_tools = tools_for_repository(self.gi, target_repository, all_tools=True)
+            repo_tools = tools_for_repository(self.gi, target_repository, all_tools=test_all_versions)
             installed_tools.extend(repo_tools)
 
         all_test_results = []
