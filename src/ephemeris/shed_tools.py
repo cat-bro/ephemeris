@@ -221,6 +221,7 @@ class InstallRepositoryManager(object):
                    test_user_api_key=None,
                    test_user="ephemeris@galaxyproject.org",
                    parallel_tests=1,
+                   test_all_versions=False,
                    ):
         """Run tool tests for all tools in each repository in supplied tool list or ``self.installed_repositories()``.
         """
