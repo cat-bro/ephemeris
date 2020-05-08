@@ -33,7 +33,6 @@ def tools_for_repository(gi, repository, all_tools=False):
     tools = []
 
     def handle_tool(tool_elem):
-        print('Hi Cat, this is the change you made')
         if not tool_elem.get('tool_shed_repository', None):
             return
         tsr = tool_elem['tool_shed_repository']
