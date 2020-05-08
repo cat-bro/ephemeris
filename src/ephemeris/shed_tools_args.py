@@ -234,6 +234,7 @@ def parser():
     )
     test_command_parser.add_argument(
         "--test_all_versions",
+        action="store_true",
         dest="test_all_versions",
         help="Run tests on all installed versions of tools.  This will only "
              "apply for tools where revisions have not been provided through "
