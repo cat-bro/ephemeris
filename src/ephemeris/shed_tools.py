@@ -568,6 +568,7 @@ def main():
             test_user_api_key=args.test_user_api_key,
             test_user=args.test_user,
             parallel_tests=args.parallel_tests,
+            test_all_versions=args.test_all_versions,
         )
     else:
         raise NotImplementedError("This point in the code should not be reached. Please contact the developers.")
