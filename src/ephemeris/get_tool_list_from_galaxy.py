@@ -136,7 +136,7 @@ class GiToToolYaml:
                         dict(name=repo.get('name'),
                              owner=repo.get('owner'),
                              tool_shed_url=repo.get('tool_shed'),
-                             revisions=[repo.get('changeset_revision')],
+                             revisions=[repo.get('installed_changeset_revision')],
                              tool_panel_section_label=tool_panel_section_label,
                              tool_panel_section_id=tool_panel_section_id)
                     )
