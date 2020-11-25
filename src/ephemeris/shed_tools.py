@@ -417,6 +417,13 @@ class InstallRepositoryManager(object):
                 #  already been installed.'}
                 if log:
                     log.debug("\tRepository {0} is already installed.".format(repository['name']))
+            if isinstance(response, list):
+                # Galaxy returns a list of installed repositories.  Sometimes the installed
+                # revision may differ from the requested revision due to updates of tool
+                # versions.  Record the installed_revision of the requested tool
+                installed_repos = [r for r in response if r['name'] == repository['name'] and r['owner'] == repository['owner']]
+                if installed_repos:
+                    repository.update({'changeset_revision': installed_repos[0].get('installed_changeset_revision')})
             if log:
                 log_repository_install_success(
                     repository=repository,
