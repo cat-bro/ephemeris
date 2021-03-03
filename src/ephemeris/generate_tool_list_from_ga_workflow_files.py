@@ -47,16 +47,23 @@ def _parser():
 
 def get_workflow_dictionary(json_file):
     with open(json_file, "r") as File:
-        mydict = json.load(File)[u'steps']
+        mydict = json.load(File)
     return mydict
 
 
-def translate_workflow_dictionary_to_tool_list(tool_dictionary, panel_label):
+def translate_workflow_dictionary_to_tool_list(workflow_dictionary):
     starting_tool_list = []
-    for step in tool_dictionary.values():
+    for step in workflow_dictionary['steps'].values():
+        sw = step.get("subworkflow")
+        if sw:
+            starting_tool_list.extend(translate_workflow_dictionary_to_tool_list(sw))
         tsr = step.get("tool_shed_repository")
         if tsr:
             starting_tool_list.append(tsr)
+    return starting_tool_list
+
+
+def format_tool_list(starting_tool_list, panel_label):
     tool_list = []
     for tool in starting_tool_list:
         sub_dic = {
@@ -96,10 +103,11 @@ def generate_tool_list_from_workflow(workflow_files, panel_label, output_file):
 
     :rtype: object
     """
-    intermediate_tool_list = []
+    starting_tool_list = []
     for workflow in workflow_files:
         workflow_dictionary = get_workflow_dictionary(workflow)
-        intermediate_tool_list += translate_workflow_dictionary_to_tool_list(workflow_dictionary, panel_label)
+        starting_tool_list += translate_workflow_dictionary_to_tool_list(workflow_dictionary)
+    intermediate_tool_list = format_tool_list(starting_tool_list, panel_label)
     reduced_tool_list = reduce_tool_list(intermediate_tool_list)
     convert_dic = {}
     convert_dic['tools'] = reduced_tool_list
