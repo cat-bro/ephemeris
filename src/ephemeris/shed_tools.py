@@ -596,11 +596,11 @@ def main():
         default_install_tool_dependencies=tool_list.get("install_tool_dependencies") or getattr(args,
                                                                                                 "install_tool_dependencies",
                                                                                                 False),
-        default_install_repository_dependencies=tool_list.get("install_repository_dependencies") or getattr(args,
-                                                                                                            "install_repository_dependencies",
+        default_install_repository_dependencies=tool_list.get("install_repository_dependencies") or not getattr(args,
+                                                                                                            "skip_install_repository_dependencies",
                                                                                                             False),
-        default_install_resolver_dependencies=tool_list.get("install_resolver_dependencies") or getattr(args,
-                                                                                                        "install_resolver_dependencies",
+        default_install_resolver_dependencies=tool_list.get("install_resolver_dependencies") or not getattr(args,
+                                                                                                        "skip_install_resolver_dependencies",
                                                                                                         False))
 
     # Start installing/updating and store the results in install_results.

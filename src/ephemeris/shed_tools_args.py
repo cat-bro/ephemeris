@@ -107,8 +107,14 @@ def parser():
         command_parser.add_argument(
             "--skip_install_tool_dependencies",
             action="store_false",
-            dest="install_tool_dependencies",
+            dest="legacy_skip_install_tool_dependencies",
             default=False,  # Override True default for this function
+            help=argparse.SUPPRESS)  # Deprecated function. Leave for backwards compatibility.
+        command_parser.add_argument(
+            "--install_resolver_dependencies",
+            action="store_true",
+            dest="legacy_install_resolver_dependencies",
+            default=True,  # Override False default for this function
             help=argparse.SUPPRESS)  # Deprecated function. Leave for backwards compatibility.
         command_parser.add_argument(
             "--install_tool_dependencies",
@@ -117,22 +123,16 @@ def parser():
             help="Turn on installation of tool dependencies using classic toolshed packages. "
                  "Can be overwritten on a per-tool basis in the tools file.")
         command_parser.add_argument(
-            "--install_resolver_dependencies",
-            action="store_true",
-            dest="install_resolver_dependencies",
-            default=True,  # Override False default for this function
-            help=argparse.SUPPRESS)  # Deprecated function. Leave for backwards compatibility.
-        command_parser.add_argument(
             "--skip_install_resolver_dependencies",
-            action="store_false",
-            dest="install_resolver_dependencies",
+            action="store_true",
+            dest="skip_install_resolver_dependencies",
             help="Skip installing tool dependencies through resolver (e.g. conda). "
                  "Will be ignored on galaxy releases older than 16.07. "
                  "Can be overwritten on a per-tool basis in the tools file")
         command_parser.add_argument(
             "--skip_install_repository_dependencies",
-            action="store_false",
-            dest="install_repository_dependencies",
+            action="store_true",
+            dest="skip_install_repository_dependencies",
             help="Skip installing the repository dependencies."
         )
         command_parser.add_argument(
