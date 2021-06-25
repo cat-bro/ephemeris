@@ -67,6 +67,15 @@ NON_TERMINAL_REPOSITORY_STATES = {
     'Loading proprietary datatypes'
 }
 
+def get_tool_tests(self, tool_id, tool_version=None):
+    url = f"tools/{tool_id}/test_data"
+    params = {'tool_version': tool_version} if tool_version else None
+    response = self._get(url, data=params)
+    assert response.status_code == 200, f"Non 200 response from tool test API. [{response.content}]"
+    return response.json()
+
+GalaxyInteractorApi.get_tool_tests = get_tool_tests  # overwrite method with fixed method from Galaxy code
+
 
 class InstallRepositoryManager(object):
     """Manages the installation of new repositories on a galaxy instance"""
